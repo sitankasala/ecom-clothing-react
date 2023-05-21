@@ -29,7 +29,7 @@ jobs:
           npm install
           npm run build --if-present
           npm run test --if-present
-        working-directory: ecom-clothing
+#        working-directory: ecom-clothing
 #      - name: Upload artifact for deployment job
 #        uses: actions/upload-artifact@v2
 #        with:
@@ -41,7 +41,7 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6B588558D2BC4837B87C66A603AB039E }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          package: .
 
 #  deploy:
 #    runs-on: ubuntu-latest
