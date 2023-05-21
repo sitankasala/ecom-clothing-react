@@ -41,7 +41,7 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6B588558D2BC4837B87C66A603AB039E }}
-          package: .
+          package: build
 
 #  deploy:
 #    runs-on: ubuntu-latest
