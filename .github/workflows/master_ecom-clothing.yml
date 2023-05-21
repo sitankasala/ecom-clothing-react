@@ -8,10 +8,6 @@ on:
     branches:
       - master
   workflow_dispatch:
-env:
-  AZURE_WEBAPP_NAME: ecom-clothing   # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: 'ecom-clothing'      # set this to the path to your web app project, defaults to the repository root
-  NODE_VERSION: '18.x'                # set this to the node version to use
 
 jobs:
   build:
@@ -19,48 +15,42 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Node.js version ${{ env.NODE_VERSION }}
+
+      - name: Set up Node.js version
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '18.x'
 
       - name: npm install, build, and test
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
-#        working-directory: ecom-clothing
-#      - name: Upload artifact for deployment job
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: node-app
-#          path: .
-      - name: Deploy to Azure Web App
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v2
+        with:
+          name: node-app
+          path: ./build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: node-app
+
+      - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          app-name: 'ecom-clothing'
+          slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6B588558D2BC4837B87C66A603AB039E }}
-          package: build
-
-#  deploy:
-#    runs-on: ubuntu-latest
-#    needs: build
-#    environment:
-#      name: 'Production'
-#      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-#
-#    steps:
-#      - name: Download artifact from build job
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: node-app
-#
-#      - name: 'Deploy to Azure Web App'
-#        id: deploy-to-webapp
-#        uses: azure/webapps-deploy@v2
-#        with:
-#          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-##          slot-name: 'Production'
-#          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6B588558D2BC4837B87C66A603AB039E }}
-#          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          package: .
